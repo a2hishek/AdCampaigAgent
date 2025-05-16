@@ -31,7 +31,7 @@ Meta Marketing API → Ad Campaign Live!
 
 ## 🛠️ Tech Stack
 
-| Component      | Technology                                |
+| Component      | Technology                                |                  
 | -------------- | ----------------------------------------- |
 | Frontend       | Streamlit                                 |
 | Backend LLM    | Google Gemini via LangChain               |
@@ -124,5 +124,9 @@ Meta Marketing API → Ad Campaign Live!
 - Create a more informed user input section after testing the full campaign generation flow.
 - Prompt enhancements to create a more robust automation workflow.
 - Add support for other ad platforms like google.
+- Current graph structure:
+  
+![Graph Structure](https://github.com/user-attachments/assets/ff7516b2-add3-4450-b932-29aa5a6391d3)
+
 
 ---
