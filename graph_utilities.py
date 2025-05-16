@@ -1,14 +1,16 @@
-import json
 from langchain_core.messages import ToolMessage
 from langgraph.graph.message import add_messages
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import END
 from typing_extensions import TypedDict
 from typing import Annotated
+import json
 
+# define the shared state of the graph
 class State(TypedDict):
-
     messages: Annotated[list, add_messages]
 
+
+# tool node to infer tool calls and invoke the tools with provided arguments
 class BasicToolNode:
     """A node that runs the tool requested in the last AIMessage."""
 
@@ -32,7 +34,8 @@ class BasicToolNode:
                 )
             )
         return {"messages": outputs}
-    
+
+
 def route_tools(state: State):
     """ used in conditional_edge to route to the ToolNode if the last message has tool calls.
     Otherwise route to the end."""
@@ -48,3 +51,7 @@ def route_tools(state: State):
     return END
 
 
+def stream_graph_updates(graph, user_input: str):
+    for event in graph.stream({"messages": [{"role": "user", "content": user_input}]}):
+        for value in event.values():
+            print("Assistant:", value["messages"][-1].content)

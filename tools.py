@@ -9,6 +9,7 @@ import getpass, os
 
 load_dotenv()
 
+# initialize facebook client
 FacebookAdsApi.init(
     access_token=os.getenv("META_ACCESS_TOKEN"),
     app_id=os.getenv("META_APP_ID"),
@@ -16,6 +17,7 @@ FacebookAdsApi.init(
 )
 account = AdAccount(os.getenv("META_AD_ACCOUNT_ID"))
 
+# user input to valid api call arguments mapping dict 
 CAMPAIGN_OBJECTIVE_MAP = {
     "Awareness": "REACH",
     "Conversions": "CONVERSIONS",
@@ -32,12 +34,12 @@ CTA_MAP = {
     }
 
 
+# Pydantic schemas for tool call arguments strcuture 
 
 class GenerateCampaign(BaseModel):
     """Generates a Meta Ad Campaign"""
     campaign_name: str = Field(description="Name of the Campaign")
     campaign_goal: str = Field(description="Objective of the Campaign")
-
 
 class GenerateAdSet(BaseModel):
     """Generates a Meta Ad Set under an Ad Campaign"""
@@ -64,6 +66,8 @@ class GenerateAd(BaseModel):
     creative_id: str = Field(description="Id of the Ad Creative that has the creative elements for the Ad.")
 
 
+# Tools for Campaign Creation and a search tool for enhancing agent knowledge
+
 if not os.environ.get("TAVILY_API_KEY"):
     os.environ["TAVILY_API_KEY"] = getpass.getpass("Tavily API key:\n")
 
@@ -71,16 +75,15 @@ search_tool = TavilySearch(max_results = 2)
 
 
 @tool("campaignGeneratorTool", args_schema=GenerateCampaign)
-def make_campaign(campaign_name: str, campaign_goal: str) -> str:
-   
+def make_campaign(campaign_goal, campaign_name):    
     fields = [
-        ]
+    ]
     params = {
-        'objective': CAMPAIGN_OBJECTIVE_MAP.get(campaign_goal),
-        'status': 'PAUSED',
-        'buying_type': 'AUCTION',
-        'name': campaign_name,
-    }
+         'objective': CAMPAIGN_OBJECTIVE_MAP.get(campaign_goal),
+         'status': 'PAUSED',
+         'buying_type': 'AUCTION',
+         'name': campaign_name,
+     }  
     campaign = account.create_campaign(
         fields=fields,
         params=params,
@@ -105,7 +108,6 @@ def make_ad_set(campaign_id, page_id, ad_set_name, daily_budget):
         'promoted_object': {'page_id': page_id},
         'name': ad_set_name,
     }
-
     ad_set = account.create_ad_set(
         fields=fields,
         params=params,
@@ -114,10 +116,11 @@ def make_ad_set(campaign_id, page_id, ad_set_name, daily_budget):
 
     return {"ad_set_id": ad_set_id}
 
+
 @tool("adCreativeGeneratorTool", args_schema=GenerateAdCreative)
 def make_ad_creative(description, creative_name, page_id, image_hash):
     fields = [
-]
+    ]
     params = {
         'body': description,
         'image_hash': image_hash,
